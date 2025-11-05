@@ -1,0 +1,23 @@
+[project]
+name = "all-projects-uv-python3-13"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "connectorx>=0.4.4",
+    "openpyxl>=3.1.5",
+    "pandas>=2.3.3",
+    "plotly>=6.4.0",
+    "plotly-express>=0.4.1",
+    "polars>=1.35.1",
+    "psycopg2-binary>=2.9.11",
+    "pymysql>=1.1.2",
+    "python-dotenv>=1.2.1",
+    "reportlab>=4.4.4",
+    "smmap==6.0.0",
+    "smmap2==3.0.1",
+    "sqlalchemy>=2.0.44",
+    "streamlit>=1.51.0",
+    "unidecode>=1.4.0",
+    "xlsxwriter>=3.2.9",
+]
