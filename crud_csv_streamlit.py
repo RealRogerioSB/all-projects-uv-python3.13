@@ -107,32 +107,19 @@ st.dataframe(
 
 with st.container(horizontal=True):
 	st.button("**Incluir**", on_click=add, type="primary", icon=":material/add:")
-	st.button("**Editar**", key="edit", type="primary", icon=":material/edit:")
-	st.button("**Deletar**", key="delete", type="primary", icon=":material/delete:")
-
-if st.session_state["edit"]:
-	if st.session_state["editor"]["selection"]["rows"]:
-		edit()
-	else:
-		st.session_state["message"] = "selection"
-
-if st.session_state["delete"]:
-	if st.session_state["editor"]["selection"]["rows"]:
-		delete()
-	else:
-		st.session_state["message"] = "selection"
+	st.button("**Editar**", on_click=edit, type="primary", icon=":material/edit:",
+	          disabled=not st.session_state["editor"]["selection"]["rows"])
+	st.button("**Deletar**", on_click=delete, type="primary", icon=":material/delete:",
+	          disabled=not st.session_state["editor"]["selection"]["rows"])
 
 if "message" in st.session_state:
 	if st.session_state["message"] == "add":
-		st.toast("**Planilha incluída com sucesso!**", icon=":material/check_circle:")
+		st.toast("**1 linha incluída com sucesso!**", icon=":material/check_circle:")
 
 	if st.session_state["message"] == "edit":
-		st.toast("**Planilha editada com sucesso!**", icon=":material/check_circle:")
+		st.toast("**1 linha editada com sucesso!**", icon=":material/check_circle:")
 
 	if st.session_state["message"] == "delete":
-		st.toast("**1 linha deletada com sucesso!**", icon=":material/check_circle:")
-
-	if st.session_state["message"] == "selection":
-		st.toast("**Não houve seleção de registro...**", icon=":material/error:")
+		st.toast("**1 linha excluída com sucesso!**", icon=":material/check_circle:")
 
 	del st.session_state["message"]

@@ -130,20 +130,10 @@ st.dataframe(
 
 with st.container(horizontal=True, horizontal_alignment="left", vertical_alignment="center"):
 	st.button("Incluir", help="Incluir cadastro", on_click=add, type="primary", icon=":material/add:")
-	st.button("Editar", key="edit", help="Editar cadastro", type="primary", icon=":material/edit:")
-	st.button("Excluir", key="delete", help="Deletar cadastro", type="primary", icon=":material/delete:")
-
-if st.session_state["edit"]:
-	if st.session_state["editor"]["selection"]["rows"]:
-		edit()
-	else:
-		st.session_state["message"] = "selection"
-
-if st.session_state["delete"]:
-	if st.session_state["editor"]["selection"]["rows"]:
-		confirm_for_delete()
-	else:
-		st.session_state["message"] = "selection"
+	st.button("Editar", help="Editar cadastro", on_click=edit, type="primary", icon=":material/edit:",
+	          disabled=not st.session_state["editor"]["selection"]["rows"])
+	st.button("Excluir", help="Deletar cadastro", on_click=confirm_for_delete, type="primary", icon=":material/delete:",
+	          disabled=not st.session_state["editor"]["selection"]["rows"])
 
 if "message" in st.session_state:
 	if st.session_state["message"] == "new":
@@ -154,8 +144,5 @@ if "message" in st.session_state:
 
 	if st.session_state["message"] == "delete":
 		st.toast("**1 linha excluída com sucesso!**", icon=":material/check_circle:")
-
-	if st.session_state["message"] == "selection":
-		st.toast("**Não houve seleção de registro...**", icon=":material/error:")
 
 	del st.session_state["message"]
