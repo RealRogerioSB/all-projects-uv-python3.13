@@ -87,7 +87,7 @@ def edit() -> None:
 
 
 @st.dialog("Confirmação")
-def confirm_for_delete() -> None:
+def delete() -> None:
 	st.markdown("Confirma a exclusão do registro?")
 
 	with st.container(horizontal=True, horizontal_alignment="center", gap="medium"):
@@ -132,7 +132,7 @@ with st.container(horizontal=True, horizontal_alignment="left", vertical_alignme
 	st.button("Incluir", help="Incluir cadastro", on_click=add, type="primary", icon=":material/add:")
 	st.button("Editar", help="Editar cadastro", on_click=edit, type="primary", icon=":material/edit:",
 	          disabled=not st.session_state["editor"]["selection"]["rows"])
-	st.button("Excluir", help="Deletar cadastro", on_click=confirm_for_delete, type="primary", icon=":material/delete:",
+	st.button("Excluir", help="Deletar cadastro", on_click=delete, type="primary", icon=":material/delete:",
 	          disabled=not st.session_state["editor"]["selection"]["rows"])
 
 if "message" in st.session_state:
