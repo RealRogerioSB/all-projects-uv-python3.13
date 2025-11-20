@@ -137,10 +137,10 @@ with st.container(horizontal=True, horizontal_alignment="left", vertical_alignme
 
 if "message" in st.session_state:
 	if st.session_state["message"] == "new":
-		st.toast("**Planilha incluída com sucesso!**", icon=":material/check_circle:")
+		st.toast("**1 linha incluída com sucesso!**", icon=":material/check_circle:")
 
 	if st.session_state["message"] == "edit":
-		st.toast("**Planilha editada com sucesso!**", icon=":material/check_circle:")
+		st.toast("**1 linha editada com sucesso!**", icon=":material/check_circle:")
 
 	if st.session_state["message"] == "delete":
 		st.toast("**1 linha excluída com sucesso!**", icon=":material/check_circle:")
