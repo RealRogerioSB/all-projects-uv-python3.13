@@ -7,7 +7,7 @@ from streamlit.connections import SQLConnection
 
 st.set_page_config("Teste de Funcionamento de SQLite", layout="wide", initial_sidebar_state="auto")
 
-engine: SQLConnection = st.connection("SQLite3", type=SQLConnection)
+engine: SQLConnection = SQLConnection("SQLite3")
 
 
 @st.cache_data(ttl=1)

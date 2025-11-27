@@ -7,7 +7,7 @@ from streamlit.connections import SQLConnection
 
 st.set_page_config("Teste de Funcionamento de SQLite", layout="wide", initial_sidebar_state="auto")
 
-engine: SQLConnection = st.connection("SQLite3", type=SQLConnection)
+engine: SQLConnection = SQLConnection("SQLite3")
 
 dict_sex: dict[int, str] = {0: "Feminino", 1: "Masculino"}
 
