@@ -8,7 +8,7 @@ from streamlit.connections import SQLConnection
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
-engine: SQLConnection = st.connection("SQLite3", type=SQLConnection)
+engine: SQLConnection = SQLConnection("SQLite3")
 
 months: list[str] = ["", "jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 

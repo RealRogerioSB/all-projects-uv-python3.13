@@ -7,7 +7,7 @@ import streamlit as st
 from streamlit.connections import SQLConnection
 from streamlit.elements.lib.column_types import ColumnConfig
 
-engine: SQLConnection = st.connection("SQLite3", type=SQLConnection)
+engine: SQLConnection = SQLConnection("SQLite3")
 
 dict_lzc: dict[int, str] = {0: "UniBB", 1: "Alura"}
 dict_mod: dict[int, str] = {0: "Presencial", 1: "Auto-instrucional"}
