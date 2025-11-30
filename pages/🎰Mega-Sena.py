@@ -1,4 +1,5 @@
 import locale
+from collections import Counter
 from datetime import date
 
 import pandas as pd
@@ -67,8 +68,8 @@ st.file_uploader("Importar", type=["xlsx"], key="xlsx_file", label_visibility="h
 if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].name == "Mega-Sena.xlsx":
 	megasena: pd.DataFrame = load_megasena()
 	
-	tab1, tab2, tab3, tab4 = st.tabs(["**Minhas apostas**", "**Apostas Sorteadas**",
-	                                  "**Sua aposta da Mega-Sena**", "**Mega-Sena da Virada**"])
+	tab1, tab2, tab3, tab4, tab5 = st.tabs(["**Minhas apostas**", "**Apostas Sorteadas**", "**Contador de bolas**",
+	                                        "**Sua aposta da Mega-Sena**", "**Mega-Sena da Virada**"])
 	
 	with tab1:
 		col1, col2 = st.columns([1.3, 2.8])
@@ -149,6 +150,56 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 			)
 	
 	with tab3:
+		bolas: Counter[int] = Counter(
+			bola for row in megasena[["bolas"]].itertuples(index=False, name=None) for bola in row[0].split()
+		)
+		
+		col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+		col1.dataframe(
+			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[:10],
+			column_config={
+				1: st.column_config.NumberColumn("Bolas", format="%02d"),
+				2: st.column_config.NumberColumn("Acertos")
+			},
+		)
+		col2.dataframe(
+			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[10:20],
+			column_config={
+				1: st.column_config.NumberColumn("Bolas", format="%02d"),
+				2: st.column_config.NumberColumn("Acertos")
+			},
+		)
+		col3.dataframe(
+			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[20:30],
+			column_config={
+				1: st.column_config.NumberColumn("Bolas", format="%02d"),
+				2: st.column_config.NumberColumn("Acertos")
+			},
+		)
+		col4.dataframe(
+			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[30:40],
+			column_config={
+				1: st.column_config.NumberColumn("Bolas", format="%02d"),
+				2: st.column_config.NumberColumn("Acertos")
+			},
+		)
+		col5.dataframe(
+			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[40:50],
+			column_config={
+				1: st.column_config.NumberColumn("Bolas", format="%02d"),
+				2: st.column_config.NumberColumn("Acertos")
+			},
+		)
+		col6.dataframe(
+			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[50:],
+			column_config={
+				1: st.column_config.NumberColumn("Bolas", format="%02d"),
+				2: st.column_config.NumberColumn("Acertos")
+			},
+		)
+	
+	with tab4:
 		st.columns(5)[0].text_input("Sua aposta:", key="sua_aposta", placeholder="01 02 03 04 05 06")
 		
 		st.button("**Acertei?**", key="btn_acertas", type="primary", icon=":material/person_play:")
@@ -180,7 +231,7 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 			else:
 				st.toast("**Preencha suas bolas!**", icon=":material/warning:")
 	
-	with tab4:
+	with tab5:
 		mega_da_virada: pd.DataFrame = megasena.copy()
 		mega_da_virada["ano"] = mega_da_virada["dt_sorteio"].dt.year
 		mega_da_virada = mega_da_virada[mega_da_virada["dt_sorteio"]. \
