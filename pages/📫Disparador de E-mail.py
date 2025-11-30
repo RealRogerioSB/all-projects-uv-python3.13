@@ -75,6 +75,6 @@ with st.columns(2)[0], st.form("disparar_email", clear_on_submit=True, border=Fa
 				except smtplib.SMTPServerDisconnected:
 					st.toast("**Não foi possível enviar, desconexão abrupta do servidor**", icon=":material/warning:")
 				except smtplib.SMTPException:
-					st.toast("**Não foi possível enviar, erro SMTP genérico", icon=":material/warning:")
+					st.toast("**Não foi possível enviar, erro SMTP genérico**", icon=":material/warning:")
 				else:
-					st.toast("**E-mail enviado con sucesso!**", icon=":material/check_circle:")
+					st.toast("**E-mail enviado com sucesso!**", icon=":material/check_circle:")

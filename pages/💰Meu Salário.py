@@ -162,8 +162,7 @@ with tab2:
 
 	df2: pd.DataFrame = load_extract_annual(st.session_state["slider_years"])
 
-	cols: list[str] = ["jan", "fev", "mar", "abr", "mai", "jun", "jul",
-					   "ago", "set", "out", "nov", "dez", "média", "total"]
+	cols: list[str] = months[1:] + ["média", "total"]
 
 	st.dataframe(
 		data=df2,
