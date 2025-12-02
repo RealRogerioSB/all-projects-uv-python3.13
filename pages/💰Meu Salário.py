@@ -138,14 +138,12 @@ with tab1:
 		st.select_slider("**Mês**", options=months[1:], value=months[get_month], key="slider_months")
 		st.slider("**Ano:**", min_value=2005, max_value=date.today().year, value=get_year, key="select_year")
 		st.button("**Incluir Salário**", on_click=new_data, type="primary", icon=":material/add_circle:")
-
-	with col2, st.container(horizontal_alignment="right"):
-		df1: pd.DataFrame = load_extract_monthly(
-			st.session_state["select_year"] * 100 + months.index(st.session_state["slider_months"])
-		)
-
-		st.markdown(f"**Total: {locale.currency(df1['valor'].sum(), grouping=True)}**")
-
+	
+	df1: pd.DataFrame = load_extract_monthly(
+		st.session_state["select_year"] * 100 + months.index(st.session_state["slider_months"])
+	)
+	
+	with col2:
 		st.dataframe(
 			data=df1,
 			hide_index=True,
@@ -156,6 +154,10 @@ with tab1:
 				"valor": st.column_config.NumberColumn(format="dollar"),
 			},
 		)
+
+		with st.container(horizontal=True):
+			st.space("stretch")
+			st.markdown(f"**Total: {locale.currency(df1['valor'].sum(), grouping=True)}**")
 
 with tab2:
 	st.slider("**Ano:**", min_value=2005, max_value=date.today().year, value=get_year, key="slider_years")
