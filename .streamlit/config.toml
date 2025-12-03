@@ -45,7 +45,7 @@ showErrorDetails = "full"
 # - "minimal": Show only options set externally (e.g., through Streamlit Community Cloud) or through
 # st.set_page_config. If there are no options left, hide the menu.
 # Default: "auto"
-toolbarMode = "auto"
+toolbarMode = "minimal"
 
 # Controls whether to display the default sidebar page navigation in a multipage app. This only applies
 # when the app's pages are defined by the `pages/` directory.
