@@ -11,7 +11,8 @@ from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 
 def validar_email(emails: str) -> bool:
-	return all(re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", mail) for mail in emails.split(", "))
+	return all(re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", mail)
+	           for mail in emails.split(", "))
 
 
 with st.columns(2)[0], st.form("disparar_email", clear_on_submit=True, border=False):

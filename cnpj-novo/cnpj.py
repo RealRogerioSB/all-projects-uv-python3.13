@@ -44,7 +44,7 @@ class CNPJ:
 
 	@staticmethod
 	def __valida_formato(_cnpj: str):
-		return re.match(r"(^([A-Z]|\d){2}\.([A-Z]|\d){3}\.([A-Z]|\d){3}\/([A-Z]|\d){4}(\-\d{2})?$)", _cnpj)
+		return re.match(r"(^([A-Z]|\d){2}\.([A-Z]|\d){3}\.([A-Z]|\d){3}/([A-Z]|\d){4}(-\d{2})?$)", _cnpj)
 
 
 if __name__ == "__main__":

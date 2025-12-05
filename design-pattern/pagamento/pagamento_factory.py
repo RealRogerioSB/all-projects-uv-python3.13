@@ -7,7 +7,7 @@ class PagamentoFactory:
     def criar_pagamento(tipo):
         if tipo == "pix":
             return PagamentoPIX()
-        elif tipo == "cartao":
+        elif tipo == "cartão":
             return PagamentoCartao()
         else:
             raise ValueError(f"Tipo de pagamento '{tipo}' não suportado")

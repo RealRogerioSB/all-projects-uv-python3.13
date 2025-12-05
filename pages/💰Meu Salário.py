@@ -156,8 +156,8 @@ with tab1:
 		)
 
 		with st.container(horizontal=True):
-			st.space("stretch")
-			st.markdown(f"**Total: {locale.currency(df1['valor'].sum(), grouping=True)}**")
+			st.markdown(f"**Total: {locale.currency(df1['valor'].sum(), grouping=True)}**",
+			            width="stretch", text_alignment="right")
 
 with tab2:
 	st.slider("**Ano:**", min_value=2005, max_value=date.today().year, value=get_year, key="slider_years")
