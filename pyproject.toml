@@ -18,7 +18,7 @@ dependencies = [
     "smmap==6.0.0",
     "smmap2==3.0.1",
     "sqlalchemy>=2.0.44",
-    "streamlit>=1.52.0",
+    "streamlit>=1.52.1",
     "unidecode>=1.4.0",
     "watchdog>=6.0.0",
     "xlsxwriter>=3.2.9",
