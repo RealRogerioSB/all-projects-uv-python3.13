@@ -232,10 +232,10 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 				st.toast("**Preencha suas bolas!**", icon=":material/warning:")
 	
 	with tab5:
-		mega_da_virada: pd.DataFrame = megasena.copy()
+		mega_da_virada: pd.DataFrame = load_megasena()
 		mega_da_virada["ano"] = mega_da_virada["dt_sorteio"].dt.year
 		mega_da_virada = mega_da_virada[mega_da_virada["dt_sorteio"]. \
-			isin(mega_da_virada[mega_da_virada["ano"] != pd.Timestamp.now().year]. \
+			isin(mega_da_virada[mega_da_virada["ano"] != date.today().year]. \
 		         groupby(["ano"])["dt_sorteio"].transform("max"))].reset_index(drop=True). \
 			drop(["ano"], axis=1)
 		mega_da_virada["dt_sorteio"] = mega_da_virada["dt_sorteio"].dt.strftime("%x (%a)")
