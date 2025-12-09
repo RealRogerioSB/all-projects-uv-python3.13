@@ -34,7 +34,7 @@ def edit(_idx: int) -> None:
 	with st.container(horizontal=True, horizontal_alignment="right"):
 		if st.button("Salvar", type="primary", icon=":material/save:"):
 			if all([name, birth, sex is not None]):
-				with engine.engine.begin() as conx:
+				with engine.engine.connect() as conx:
 					conx.execute(
 						text("""
 							UPDATE simples
@@ -45,6 +45,7 @@ def edit(_idx: int) -> None:
 						"""),
 						dict(name=name, birth=birth, sex=sex, idx=_idx)
 					)
+					conx.commit()
 				st.cache_data.clear()
 				st.session_state["simples"] = load_data()
 				st.session_state["message"] = "edit"
@@ -62,8 +63,9 @@ def delete(_idx: int) -> None:
 		st.button("Não", key="não", type="primary", icon=":material/cancel:")
 
 	if st.session_state["sim"]:
-		with engine.engine.begin() as conx:
+		with engine.engine.connect() as conx:
 			conx.execute(text("DELETE FROM simples WHERE idx = :idx"), dict(idx=_idx))
+			conx.commit()
 		st.cache_data.clear()
 		st.session_state["simples"] = load_data()
 		st.session_state["message"] = "delete"

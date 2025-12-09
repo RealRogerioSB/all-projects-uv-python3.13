@@ -20,7 +20,7 @@ def load_data() -> pd.DataFrame:
 
 
 def create_or_update(_name: str, _birth: date, _sex: int, _idx: int | None = None) -> None:
-	with engine.engine.begin() as conx:
+	with engine.engine.connect() as conx:
 		conx.execute(
 			text("""
 				INSERT INTO simples (idx, nome, nascimento, sexo)
@@ -31,12 +31,14 @@ def create_or_update(_name: str, _birth: date, _sex: int, _idx: int | None = Non
 					sexo = excluded.sexo
 			"""), dict(idx=_idx, nome=_name, nascimento=_birth, sexo=_sex),
 		)
+		conx.commit()
 		st.cache_data.clear()
 
 
 def delete_by_idx(_idx: int) -> None:
-	with engine.engine.begin() as conx:
+	with engine.engine.connect() as conx:
 		conx.execute(text("DELETE FROM simples WHERE idx = :idx"), dict(idx=_idx))
+		conx.commit()
 		st.cache_data.clear()
 
 
