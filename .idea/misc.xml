@@ -4,4 +4,10 @@
     <option name="sdkName" value="uv (all-projects-uv-python3.13)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="uv (all-projects-uv-python3.13)" project-jdk-type="Python SDK" />
+  <component name="PyreflyConfiguration">
+    <option name="enabled" value="true" />
+  </component>
+  <component name="RuffConfiguration">
+    <option name="enabled" value="true" />
+  </component>
 </project>

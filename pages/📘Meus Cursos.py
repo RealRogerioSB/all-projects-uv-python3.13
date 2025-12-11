@@ -101,7 +101,7 @@ elif st.session_state["abas"] == 3:
 		try:
 			df: pd.DataFrame = engine.query(st.session_state["sql"], show_spinner="Executando o SQL, aguarde...", ttl=1)
 		except (sqlite3.OperationalError, sa.OperationalError):
-			st.toast(f"**Erro de sintaxe de SQL:** reveja e corrige o script.", icon=":material/error:")
+			st.toast("**Erro de sintaxe de SQL:** reveja e corrige o script.", icon=":material/error:")
 		else:
 			st.dataframe(df, width="content", hide_index=True)
 			st.button("**Voltar**", type="primary", icon=":material/reply:")

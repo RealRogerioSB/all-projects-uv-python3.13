@@ -48,9 +48,10 @@ def load_megasena() -> pd.DataFrame | None:
 		df[coluna] = df[coluna].astype(str).replace(r"\D", "", regex=True).astype(float) / 100
 	
 	df.drop(
-		["Bola1", "Bola2", "Bola3", "Bola4", "Bola5", "Bola6", "Cidade / UF", "Acumulado 6 acertos",
+		labels=["Bola1", "Bola2", "Bola3", "Bola4", "Bola5", "Bola6", "Cidade / UF", "Acumulado 6 acertos",
 		 "Arrecadação Total", "Estimativa prêmio", "Acumulado Sorteio Especial Mega da Virada", "Observação"],
-		axis=1, inplace=True
+		axis=1,
+		inplace=True
 	)
 	
 	df.columns = [
@@ -75,9 +76,7 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 		col1, col2 = st.columns([1.3, 2.8])
 		
 		with col1:
-			minhas: list[str] = [
-				f"Aposta {x:02} -> {aposta}" for x, aposta in enumerate(minhas_apostas, 1)
-			]
+			minhas: list[str] = [f"Aposta {x:02} -> {aposta}" for x, aposta in enumerate(minhas_apostas, 1)]
 			
 			st.data_editor(
 				data=minhas,
@@ -211,7 +210,7 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 			if st.session_state["sua_aposta"]:
 				sua_aposta: set[int] = set(map(int, st.session_state["sua_aposta"].split()))
 				
-				with st.spinner("Obtendo os acertos de apostas, aguarde...", show_time=True):
+				with st.spinner("Obtendo os acertos de apostas, aguarde...", show_time=True, width="stretch"):
 					for row in megasena.itertuples(index=False, name=None):
 						match: set[int] = set(map(int, row[2].split())) & sua_aposta
 						

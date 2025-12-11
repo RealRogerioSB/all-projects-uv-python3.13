@@ -61,7 +61,7 @@ with st.columns(2)[0], st.form("disparar_email", clear_on_submit=True, border=Fa
 				smtp_server.starttls()
 				smtp_server.login(st.secrets["REMETENTE"], st.secrets["PASSWORD"])
 				try:
-					with st.spinner("**⏳Enviando e-mail, aguarde...**", show_time=True):
+					with st.spinner("**⏳Enviando e-mail, aguarde...**", show_time=True, width="stretch"):
 						smtp_server.send_message(msg)
 				except smtplib.SMTPAuthenticationError:
 					st.toast("**Não foi possível enviar, erro de autenticação**", icon=":material/warning:")
