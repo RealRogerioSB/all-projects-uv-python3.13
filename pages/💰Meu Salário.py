@@ -15,7 +15,7 @@ months: list[str] = ["", "jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago",
 
 @st.cache_data(show_spinner="⏳Obtendo os dados, aguarde...", ttl=1)
 def last_period() -> int:
-	return engine.query("SELECT MAX(período) AS MAIOR FROM mirrors").loc[0, "MAIOR"]
+	return engine.query("SELECT MAX(período) AS MAIOR FROM mirrors").loc[0, "MAIOR"]  # ty:ignore[invalid-return-type]
 
 
 @st.cache_data(show_spinner="⏳Obtendo os dados, aguarde...", ttl=1)
@@ -55,8 +55,8 @@ def load_extract_annual(_year: int) -> pd.DataFrame:
 
 @st.cache_data(show_spinner="⏳Obtendo os dados, aguarde...", ttl=1)
 def load_total_annual() -> pd.DataFrame:
-	load: pd.DataFrame = engine.query("SELECT período, valor FROM mirrors")
-	load = load.groupby(["período"])["valor"].sum().reset_index()
+	load: pd.DataFrame = engine.query("SELECT período, valor FROM mirrors") \
+		.groupby(["período"])["valor"].sum().reset_index()
 	load["ano"] = pd.to_datetime(load["período"], format="%Y%m").dt.year
 	load["mês"] = pd.to_datetime(load["período"], format="%Y%m").dt.strftime("%b")
 	load = load.pivot(columns="mês", index="ano", values="valor").fillna(0)

@@ -4,6 +4,7 @@ from datetime import date
 
 import pandas as pd
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
@@ -37,31 +38,56 @@ months: list[str] = [
 
 
 @st.cache_data(show_spinner="⏳Obtendo os dados, aguarde...", ttl=1)
-def load_megasena() -> pd.DataFrame | None:
-	df: pd.DataFrame = pd.read_excel(io=st.session_state["xlsx_file"], engine="openpyxl")
+def load_megasena() -> pd.DataFrame:
+	df: pd.DataFrame = pd.read_excel(st.session_state["xlsx_file"], engine="openpyxl")
 	
 	df["Data do Sorteio"] = pd.to_datetime(df["Data do Sorteio"], format="%d/%m/%Y")
-	df.insert(2, "Bolas", df[[f"Bola{i}" for i in range(1, 7)]].astype(str).
-	          apply(lambda rows: " ".join(val.zfill(2) for val in rows), axis=1))
+	df.insert(2,"Bolas",df[[f"Bola{i}" for i in range(1, 7)]].astype(str) \
+	          .apply(lambda rows: " ".join(val.zfill(2) for val in rows), axis=1))
 	
 	for coluna in ["Rateio 6 acertos", "Rateio 5 acertos", "Rateio 4 acertos"]:
-		df[coluna] = df[coluna].astype(str).replace(r"\D", "", regex=True).astype(float) / 100
+		df[coluna] = (df[coluna].astype(str).replace(r"\D", "", regex=True).astype(float) / 100)
 	
 	df.drop(
 		labels=["Bola1", "Bola2", "Bola3", "Bola4", "Bola5", "Bola6", "Cidade / UF", "Acumulado 6 acertos",
-		 "Arrecadação Total", "Estimativa prêmio", "Acumulado Sorteio Especial Mega da Virada", "Observação"],
+		        "Arrecadação Total", "Estimativa prêmio", "Acumulado Sorteio Especial Mega da Virada", "Observação"],
 		axis=1,
-		inplace=True
+		inplace=True,
 	)
-	
 	df.columns = [
 		"id_sorteio", "dt_sorteio", "bolas", "winners_6x", "rateios_6x",
 		"winners_5x", "rateios_5x", "winners_4x", "rateios_4x"
 	]
-	
 	df = df.sort_values(by=["id_sorteio", "dt_sorteio"], ignore_index=True)
 	
 	return df
+
+
+def set_abas(n_match: int, aba: DeltaGenerator) -> None:
+	mega_copy: dict[str, list[int | str]] = {
+		"Concurso": [],
+		"Data do Sorteio": [],
+		"Bolas Acertadas": [],
+		"Sua aposta": [],
+	}
+	
+	for row in megasena[["id_sorteio", "dt_sorteio", "bolas"]].copy().itertuples(index=False, name=None):
+		for aposta in minhas_apostas:
+			acertos: set[int] = set(map(int, aposta.split()))
+			match: set[int] = set(map(int, row[2].split())) & acertos
+			
+			if len(match) == n_match:
+				mega_copy["Concurso"].append(str(row[0]).zfill(4))
+				mega_copy["Data do Sorteio"].append(row[1].strftime("%x (%a)"))
+				mega_copy["Bolas Acertadas"].append(" ".join(f"{n:02}" for n in sorted(match)))
+				mega_copy["Sua aposta"].append(minhas_apostas.index(aposta) + 1)
+	
+	aba.dataframe(
+		data=mega_copy,
+		hide_index=True,
+		column_config={"Sua aposta": st.column_config.NumberColumn(width="small")},
+		row_height=25,
+	)
 
 
 st.file_uploader("Importar", type=["xlsx"], key="xlsx_file", label_visibility="hidden", width=250)
@@ -78,10 +104,9 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 		with col1:
 			minhas: list[str] = [f"Aposta {x:02} -> {aposta}" for x, aposta in enumerate(minhas_apostas, 1)]
 			
-			st.data_editor(
+			st.dataframe(
 				data=minhas,
 				width="content",
-				height=534,
 				hide_index=True,
 				column_config={"value": st.column_config.TextColumn(label="Minhas Apostas")},
 				key="de_apostas",
@@ -89,32 +114,16 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 			)
 		
 		with col2:
-			for r in range(6, 3, -1):
-				st.write(f"**Acerto de {r} bolas**")
-				
-				mega_copy: dict[str, list[int | str]] = {
-					"Concurso": [], "Data do Sorteio": [], "Bolas Acertadas": [], "Sua aposta n.°": []
-				}
-				
-				for row in megasena[["id_sorteio", "dt_sorteio", "bolas"]].copy().itertuples(index=False, name=None):
-					for aposta in minhas_apostas:
-						acertos: set[int] = set(map(int, aposta.split()))
-						
-						match: set[int] = set(map(int, row[2].split())) & acertos
-						
-						if len(match) == r:
-							mega_copy["Concurso"].append(str(row[0]).zfill(4))
-							mega_copy["Data do Sorteio"].append(row[1].strftime("%x (%a)"))
-							mega_copy["Bolas Acertadas"].append(" ".join(f"{n:02}" for n in sorted(match)))
-							mega_copy["Sua aposta n.°"].append(minhas_apostas.index(aposta) + 1)
-				
-				st.columns([2.5, 0.5])[0].dataframe(
-					data=mega_copy,
-					width="content",
-					hide_index=True,
-					column_config={"Bolas Acertadas": st.column_config.TextColumn("Bolas Acertadas")},
-					row_height=25,
-				)
+			aba_6, aba_5, aba_4 = st.tabs(["**Acertos 6 bolas**", "**Acertos 5 bolas**", "**Acertos 4 bolas**"])
+			
+			with aba_6:
+				set_abas(6, aba_6)
+			
+			with aba_5:
+				set_abas(5, aba_5)
+			
+			with aba_4:
+				set_abas(4, aba_4)
 	
 	with tab2:
 		col1, col2 = st.columns([1, 4])
@@ -124,12 +133,13 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 			st.slider("**Ano:**", min_value=1996, max_value=date.today().year, value=date.today().year, key="ano")
 		
 		with col2:
-			all_mega: pd.DataFrame = megasena[megasena["dt_sorteio"].dt.year.eq(st.session_state["ano"]) &
-			                                  megasena["dt_sorteio"].dt.month.eq(
-				                                  months.index(st.session_state["mês"]))].copy()
+			all_mega: pd.DataFrame = megasena[
+				megasena["dt_sorteio"].dt.year.eq(st.session_state["ano"])
+				& megasena["dt_sorteio"].dt.month.eq(months.index(st.session_state["mês"]))
+			].copy()
 			all_mega["dt_sorteio"] = all_mega["dt_sorteio"].dt.strftime("%x (%a)")
 			
-			st.data_editor(
+			st.dataframe(
 				data=all_mega,
 				width="content",
 				hide_index=True,
@@ -150,51 +160,53 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 	
 	with tab3:
 		bolas: Counter[int] = Counter(
-			bola for row in megasena[["bolas"]].itertuples(index=False, name=None) for bola in row[0].split()
+			bola
+			for row in megasena[["bolas"]].copy().itertuples(index=False, name=None)
+			for bola in row[0].split()
 		)
 		
 		col1, col2, col3, col4, col5, col6 = st.columns(6)
-
+		
 		col1.dataframe(
 			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[:10],
 			column_config={
 				1: st.column_config.NumberColumn("Bolas", format="%02d"),
-				2: st.column_config.NumberColumn("Acertos")
+				2: st.column_config.NumberColumn("Acertos"),
 			},
 		)
 		col2.dataframe(
 			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[10:20],
 			column_config={
 				1: st.column_config.NumberColumn("Bolas", format="%02d"),
-				2: st.column_config.NumberColumn("Acertos")
+				2: st.column_config.NumberColumn("Acertos"),
 			},
 		)
 		col3.dataframe(
 			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[20:30],
 			column_config={
 				1: st.column_config.NumberColumn("Bolas", format="%02d"),
-				2: st.column_config.NumberColumn("Acertos")
+				2: st.column_config.NumberColumn("Acertos"),
 			},
 		)
 		col4.dataframe(
 			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[30:40],
 			column_config={
 				1: st.column_config.NumberColumn("Bolas", format="%02d"),
-				2: st.column_config.NumberColumn("Acertos")
+				2: st.column_config.NumberColumn("Acertos"),
 			},
 		)
 		col5.dataframe(
 			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[40:50],
 			column_config={
 				1: st.column_config.NumberColumn("Bolas", format="%02d"),
-				2: st.column_config.NumberColumn("Acertos")
+				2: st.column_config.NumberColumn("Acertos"),
 			},
 		)
 		col6.dataframe(
 			data=sorted(bolas.items(), key=lambda item: item[1], reverse=True)[50:],
 			column_config={
 				1: st.column_config.NumberColumn("Bolas", format="%02d"),
-				2: st.column_config.NumberColumn("Acertos")
+				2: st.column_config.NumberColumn("Acertos"),
 			},
 		)
 	
@@ -203,24 +215,27 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 		
 		st.button("**Acertei?**", key="btn_acertas", type="primary", icon=":material/person_play:")
 		
-		mega_copy2: dict[str, list[int | str]] = {"Concurso": [], "Data de Sorteio": [],
-		                                          "Bolas Sorteadas": [], "Seus Acertos": []}
+		mega_copy2: dict[str, list[int | str]] = {
+			"Concurso": [],
+			"Data de Sorteio": [],
+			"Bolas Sorteadas": [],
+			"Seus Acertos": [],
+		}
 		
 		if st.session_state["btn_acertas"]:
 			if st.session_state["sua_aposta"]:
 				sua_aposta: set[int] = set(map(int, st.session_state["sua_aposta"].split()))
 				
-				with st.spinner("Obtendo os acertos de apostas, aguarde...", show_time=True, width="stretch"):
-					for row in megasena.itertuples(index=False, name=None):
-						match: set[int] = set(map(int, row[2].split())) & sua_aposta
-						
-						if len(match) >= 4:
-							mega_copy2["Concurso"].append(row[0])
-							mega_copy2["Data de Sorteio"].append(row[1].strftime("%x (%a)"))
-							mega_copy2["Bolas Sorteadas"].append(row[2])
-							mega_copy2["Seus Acertos"].append(" ".join(f"{n:02}" for n in sorted(match)))
+				for row in megasena.copy().itertuples(index=False, name=None):
+					matches: set[int] = set(map(int, row[2].split())) & sua_aposta
+					
+					if len(matches) >= 4:
+						mega_copy2["Concurso"].append(row[0])
+						mega_copy2["Data de Sorteio"].append(row[1].strftime("%x (%a)"))
+						mega_copy2["Bolas Sorteadas"].append(row[2])
+						mega_copy2["Seus Acertos"].append(" ".join(f"{n:02}" for n in sorted(matches)))
 				
-				st.columns([2.5, 1, 1])[0].data_editor(
+				st.columns([2.5, 1, 1])[0].dataframe(
 					data=mega_copy2,
 					width="content",
 					hide_index=True,
@@ -231,15 +246,15 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 				st.toast("**Preencha suas bolas!**", icon=":material/warning:")
 	
 	with tab5:
-		mega_da_virada: pd.DataFrame = load_megasena()
+		mega_da_virada: pd.DataFrame = megasena.copy()
 		mega_da_virada["ano"] = mega_da_virada["dt_sorteio"].dt.year
-		mega_da_virada = mega_da_virada[mega_da_virada["dt_sorteio"]. \
-			isin(mega_da_virada[mega_da_virada["ano"] != date.today().year]. \
-		         groupby(["ano"])["dt_sorteio"].transform("max"))].reset_index(drop=True). \
-			drop(["ano"], axis=1)
+		mega_da_virada = mega_da_virada[mega_da_virada["dt_sorteio"] \
+			.isin(mega_da_virada[mega_da_virada["ano"] != date.today().year] \
+		          .groupby(["ano"])["dt_sorteio"].transform("max"))] \
+			.reset_index(drop=True).drop(["ano"], axis=1)
 		mega_da_virada["dt_sorteio"] = mega_da_virada["dt_sorteio"].dt.strftime("%x (%a)")
 		
-		st.data_editor(
+		st.dataframe(
 			data=mega_da_virada,
 			width="content",
 			hide_index=True,
@@ -254,6 +269,5 @@ if st.session_state["xlsx_file"] is not None and st.session_state["xlsx_file"].n
 				"winners_4x": st.column_config.NumberColumn("4x", format="%d"),
 				"rateios_4x": st.column_config.NumberColumn("Rateios 4x", format="dollar"),
 			},
-			key="de_mega_da_virada",
 			row_height=25,
 		)
